@@ -1,0 +1,278 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#10172a">
+<title>Giga Kreator Gratis</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b1020;color:white;font-family:Arial,sans-serif}
+header{padding:22px;background:linear-gradient(120deg,#263c79,#7139a0)}
+header h1{margin:0;font-size:25px}
+header p{color:#ddd;font-size:13px}
+nav{display:flex;overflow-x:auto;background:#151e32;padding:10px;gap:7px;position:sticky;top:0}
+button{border:0;padding:12px 15px;border-radius:10px;background:#7655e8;color:white;font-weight:bold}
+nav button{white-space:nowrap;background:#28344c}
+main{padding:15px;max-width:750px;margin:auto}
+section{display:none;background:#172238;padding:18px;border-radius:15px;margin-top:12px}
+section.active{display:block}
+h2{margin-top:0}
+label{display:block;margin:15px 0}
+input,textarea,select{display:block;width:100%;padding:12px;margin-top:7px;border-radius:8px;border:1px solid #52617d;background:#0c1528;color:white;font-size:15px}
+textarea{min-height:100px}
+.action{width:100%;margin-top:8px}
+.result{width:100%;margin-top:15px;border-radius:10px}
+.status{color:#a9e9cf;font-size:13px;margin:12px 0}
+a{color:#a9d6ff}
+canvas{max-width:100%;height:auto}
+footer{text-align:center;color:#8290a9;padding:25px;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+<h1>✦ GIGA KREATOR</h1>
+<p>FREE AI CREATIVE STUDIO</p>
+</header>
+
+<nav>
+<button onclick="tab('text')">✍️ Teks</button>
+<button onclick="tab('image')">🎨 Gambar</button>
+<button onclick="tab('video')">🎬 Video</button>
+<button onclick="tab('voice')">🔊 Suara</button>
+<button onclick="tab('photo')">🖼️ Foto</button>
+</nav>
+
+<main>
+
+<section id="text" class="active">
+<h2>AI Text Generator</h2>
+<label>Jenis tulisan
+<select id="type">
+<option>Caption media sosial</option>
+<option>Artikel</option>
+<option>Cerita anak</option>
+<option>Promosi produk</option>
+<option>Ide video</option>
+<option>Prompt gambar AI</option>
+</select></label>
+<label>Masukkan perintah
+<textarea id="prompt" placeholder="Contoh: Buat cerita ayah dan anak perempuan yang menyentuh hati"></textarea>
+</label>
+<button class="action" onclick="makeText()">BUAT TEKS</button>
+<div id="ts" class="status"></div>
+<textarea id="tout" placeholder="Hasil tulisan akan muncul di sini"></textarea>
+<button onclick="copyText()">SALIN HASIL</button>
+</section>
+
+<section id="image">
+<h2>AI Image Generator</h2>
+<label>Deskripsikan gambar
+<textarea id="iprompt" placeholder="Contoh: Foto keluarga bahagia di taman, realistis, kualitas tinggi"></textarea>
+</label>
+<button class="action" onclick="makeImage()">BUAT GAMBAR</button>
+<div id="is" class="status"></div>
+<img id="iout" class="result" hidden>
+<a id="idl" hidden>Download gambar</a>
+</section>
+
+<section id="video">
+<h2>AI Video Maker</h2>
+<p>Buat video animasi dari foto dan tulisan.</p>
+<label>Pilih foto
+<input id="vfile" type="file" accept="image/*">
+</label>
+<label>Teks video
+<input id="vtext" placeholder="Masukkan tulisan video">
+</label>
+<label>Durasi (detik)
+<input id="vduration" type="number" value="6" min="3" max="20">
+</label>
+<button class="action" onclick="makeVideo()">BUAT VIDEO</button>
+<div id="vs" class="status"></div>
+<canvas id="vc" width="720" height="1280" hidden></canvas>
+<video id="vout" class="result" controls hidden></video>
+<a id="vdownload" hidden>Download video</a>
+</section>
+
+<section id="voice">
+<h2>AI Voice Generator</h2>
+<label>Teks narasi
+<textarea id="voiceText" placeholder="Tuliskan kalimat yang ingin dibacakan"></textarea>
+</label>
+<label>Pilih suara
+<select id="voiceSelect"></select>
+</label>
+<label>Kecepatan
+<input id="rate" type="range" min="0.6" max="1.5" step="0.1" value="1">
+</label>
+<button onclick="speak()">▶ PUTAR SUARA</button>
+<button onclick="speechSynthesis.cancel()">BERHENTI</button>
+<div id="ss" class="status"></div>
+</section>
+
+<section id="photo">
+<h2>Photo Editor</h2>
+<label>Pilih foto
+<input type="file" id="pfile" accept="image/*">
+</label>
+<label>Kecerahan
+<input id="bright" type="range" min="50" max="180" value="100">
+</label>
+<label>Kontras
+<input id="contrast" type="range" min="50" max="180" value="100">
+</label>
+<label>Saturasi
+<input id="sat" type="range" min="0" max="200" value="100">
+</label>
+<canvas id="pc" class="result"></canvas>
+<button class="action" onclick="savePhoto()">SIMPAN FOTO</button>
+<div id="ps" class="status"></div>
+</section>
+
+</main>
+<footer>Giga Kreator Gratis © 2026</footer>
+
+<script>
+function tab(id){
+document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+}
+
+async function makeText(){
+let p=document.getElementById('prompt').value;
+if(!p)return alert('Masukkan perintah terlebih dahulu');
+let status=document.getElementById('ts');
+status.innerText='Sedang membuat tulisan...';
+try{
+let q='Buat '+document.getElementById('type').value+' dalam bahasa Indonesia: '+p;
+let r=await fetch('https://text.pollinations.ai/'+encodeURIComponent(q));
+if(!r.ok)throw Error('Layanan tidak tersedia');
+document.getElementById('tout').value=await r.text();
+status.innerText='Selesai!';
+}catch(e){status.innerText='Gagal mengakses layanan AI. Coba lagi nanti.'}
+}
+
+function copyText(){
+let t=document.getElementById('tout');
+t.select();document.execCommand('copy');
+alert('Teks disalin');
+}
+
+function makeImage(){
+let p=document.getElementById('iprompt').value;
+if(!p)return alert('Masukkan deskripsi gambar');
+let img=document.getElementById('iout');
+let link=document.getElementById('idl');
+document.getElementById('is').innerText='Membuat gambar...';
+img.hidden=false;
+img.onload=()=>{
+document.getElementById('is').innerText='Gambar selesai!';
+link.href=img.src;
+link.download='giga-kreator.png';
+link.hidden=false;
+};
+img.onerror=()=>document.getElementById('is').innerText='Gagal membuat gambar. Coba lagi.';
+img.src='https://image.pollinations.ai/prompt/'+encodeURIComponent(p);
+}
+
+let voices=[];
+function loadVoices(){
+voices=speechSynthesis.getVoices();
+let s=document.getElementById('voiceSelect');
+s.innerHTML='';
+voices.forEach((v,i)=>{
+let o=document.createElement('option');
+o.value=i;o.textContent=v.name+' '+v.lang;s.appendChild(o);
+});
+let id=voices.findIndex(v=>v.lang.startsWith('id'));
+if(id>=0)s.value=id;
+}
+if('speechSynthesis' in window){
+loadVoices();
+speechSynthesis.onvoiceschanged=loadVoices;
+}
+function speak(){
+let t=document.getElementById('voiceText').value;
+if(!t)return alert('Masukkan teks');
+let u=new SpeechSynthesisUtterance(t);
+u.rate=+document.getElementById('rate').value;
+if(voices[document.getElementById('voiceSelect').value])
+u.voice=voices[document.getElementById('voiceSelect').value];
+u.lang='id-ID';
+u.onstart=()=>document.getElementById('ss').innerText='Suara sedang diputar...';
+u.onend=()=>document.getElementById('ss').innerText='Selesai';
+speechSynthesis.cancel();
+speechSynthesis.speak(u);
+}
+
+let pimg=new Image();
+document.getElementById('pfile').onchange=e=>{
+let f=e.target.files[0];
+if(f){pimg.onload=drawPhoto;pimg.src=URL.createObjectURL(f);}
+};
+['bright','contrast','sat'].forEach(id=>{
+document.getElementById(id).oninput=drawPhoto;
+});
+function drawPhoto(){
+if(!pimg.src)return;
+let c=document.getElementById('pc'),ctx=c.getContext('2d');
+c.width=pimg.naturalWidth;c.height=pimg.naturalHeight;
+ctx.filter='brightness('+bright.value+'%) contrast('+contrast.value+'%) saturate('+sat.value+'%)';
+ctx.drawImage(pimg,0,0);
+}
+function savePhoto(){
+let c=document.getElementById('pc');
+if(!c.width)return alert('Pilih foto dahulu');
+let a=document.createElement('a');
+a.download='giga-foto.png';a.href=c.toDataURL();
+a.click();
+document.getElementById('ps').innerText='Foto berhasil disimpan';
+}
+
+let vimg=new Image();
+document.getElementById('vfile').onchange=e=>{
+let f=e.target.files[0];
+if(f){vimg.src=URL.createObjectURL(f);}
+};
+function makeVideo(){
+if(!vimg.src)return alert('Pilih foto dahulu');
+if(!window.MediaRecorder)return alert('Browser tidak mendukung video recorder');
+let c=document.getElementById('vc'),ctx=c.getContext('2d');
+let stream=c.captureStream(25),chunks=[];
+let recorder;
+try{recorder=new MediaRecorder(stream);}
+catch(e){return alert('Format video tidak didukung');}
+let duration=Math.min(20,Math.max(3,+vduration.value||6));
+let start;
+recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+recorder.onstop=()=>{
+let url=URL.createObjectURL(new Blob(chunks,{type:'video/webm'}));
+let out=document.getElementById('vout');
+out.src=url;out.hidden=false;
+let a=document.getElementById('vdownload');
+a.href=url;a.download='giga-video.webm';a.hidden=false;
+document.getElementById('vs').innerText='Video berhasil dibuat!';
+};
+recorder.start();
+document.getElementById('vs').innerText='Sedang membuat video...';
+start=performance.now();
+function draw(now){
+let t=(now-start)/1000;
+ctx.fillStyle='#111';ctx.fillRect(0,0,720,1280);
+let scale=Math.max(720/vimg.width,1280/vimg.height);
+let w=vimg.width*scale,h=vimg.height*scale;
+ctx.drawImage(vimg,(720-w)/2,(1280-h)/2,w,h);
+ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(0,1030,720,250);
+ctx.fillStyle='white';ctx.font='bold 40px Arial';
+ctx.textAlign='center';
+ctx.fillText(document.getElementById('vtext').value.slice(0,45),360,1150);
+if(t<duration)requestAnimationFrame(draw);
+else recorder.stop();
+}
+requestAnimationFrame(draw);
+}
+</script>
+</body>
+</html>
